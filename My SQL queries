@@ -1,0 +1,155 @@
+CREATE DATABASE banking_analysis;
+USE banking_analysis;
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100),
+    city VARCHAR(50),
+    signup_date DATE
+);
+CREATE TABLE Accounts (
+    account_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    account_type VARCHAR(30),
+    balance DECIMAL(12,2),
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+CREATE TABLE Transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    account_id INT,
+    transaction_date DATE,
+    transaction_type VARCHAR(20),
+    amount DECIMAL(10,2),
+    FOREIGN KEY (account_id) REFERENCES Accounts(account_id)
+);
+CREATE TABLE Loans (
+    loan_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    loan_type VARCHAR(30),
+    loan_amount DECIMAL(12,2),
+    loan_status VARCHAR(20),
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+INSERT INTO Customers (customer_name, city, signup_date) VALUES
+('Rahul Sharma','Delhi','2023-01-10'),
+('Amit Verma','Mumbai','2023-02-15'),
+('Priya Singh','Kolkata','2023-03-20'),
+('Neha Gupta','Chennai','2023-04-05'),
+('Vikas Jaiswal','Bangalore','2023-05-01');
+INSERT INTO Accounts (customer_id, account_type, balance) VALUES
+(1,'Savings',50000),
+(2,'Current',120000),
+(3,'Savings',75000),
+(4,'Savings',30000),
+(5,'Current',150000);
+INSERT INTO Transactions (account_id, transaction_date, transaction_type, amount) VALUES
+(1,'2024-01-05','Deposit',10000),
+(1,'2024-01-10','Withdrawal',5000),
+(2,'2024-01-12','Deposit',20000),
+(3,'2024-01-15','Withdrawal',7000),
+(5,'2024-01-18','Deposit',30000);
+INSERT INTO Loans (customer_id, loan_type, loan_amount, loan_status) VALUES
+(1,'Home Loan',500000,'Approved'),
+(2,'Car Loan',300000,'Approved'),
+(3,'Personal Loan',100000,'Pending'),
+(5,'Education Loan',200000,'Approved');
+
+-- 1. Total balance in bank
+SELECT SUM(balance) AS total_bank_balance
+FROM Accounts;
+
+-- 2. Customer-wise total balance
+SELECT c.customer_name, SUM(a.balance) AS total_balance
+FROM Customers c
+JOIN Accounts a ON c.customer_id = a.customer_id
+GROUP BY c.customer_name;
+
+-- 3. Top 3 customers by balance
+SELECT c.customer_name, SUM(a.balance) AS total_balance
+FROM Customers c
+JOIN Accounts a ON c.customer_id = a.customer_id
+GROUP BY c.customer_name
+ORDER BY total_balance DESC
+LIMIT 3;
+
+-- 4. Total deposits vs withdrawals
+SELECT transaction_type, SUM(amount) AS total_amount
+FROM Transactions
+GROUP BY transaction_type;
+
+-- 5. Monthly transaction amount 
+SELECT MONTH(transaction_date) AS month,
+       SUM(amount) AS total_amount
+FROM Transactions
+GROUP BY MONTH(transaction_date)
+ORDER BY month;
+
+-- 6. Customers who took loans
+SELECT DISTINCT c.customer_name
+FROM Customers c
+JOIN Loans l ON c.customer_id = l.customer_id;
+
+-- 7. Loan amount by loan type
+SELECT loan_type, SUM(loan_amount) AS total_loan
+FROM Loans
+GROUP BY loan_type;
+
+-- 8. Customers without any loan
+SELECT customer_name
+FROM Customers
+WHERE customer_id NOT IN (
+    SELECT customer_id FROM Loans
+);
+
+-- 9. Average account balance
+SELECT AVG(balance) AS avg_balance
+FROM Accounts;
+
+-- 10. Accounts with balance above average
+SELECT account_id, balance
+FROM Accounts
+WHERE balance > (
+    SELECT AVG(balance) FROM Accounts
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
